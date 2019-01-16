@@ -31,7 +31,7 @@ public class SaveImageAction extends AnAction {
             fileDirPath = getUserSystemProperty("user.home");
             fileSeparator = getUserSystemProperty("file.separator");
         } catch (IllegalArgumentException | SecurityException e) {
-            System.out.println(e.getMessage());
+            exceptionNotify(e.getMessage(), project);
             return;
         }
 
@@ -41,7 +41,8 @@ public class SaveImageAction extends AnAction {
         try {
             ImageIO.write(codeImage, fileFormat, file);
         } catch (IOException e) {
-            System.out.println("An error occurred during writing.");
+            exceptionNotify("An error occurred during writing.", project);
+            return;
         }
         CodeImagePlugin.NOTIFICATION_GROUP
                 .createNotification(
@@ -64,5 +65,11 @@ public class SaveImageAction extends AnAction {
         } catch (SecurityException e) {
             throw new SecurityException("Security manager doesn't allow access to the system property: " + property, e);
         }
+    }
+
+    private void exceptionNotify(String error, Project project) {
+        CodeImagePlugin.NOTIFICATION_GROUP
+                .createNotification("An error occurred:", error, NotificationType.ERROR, null)
+                .notify(project);
     }
 }
