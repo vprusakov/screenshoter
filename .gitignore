@@ -1,0 +1,13 @@
+### Gradle ###
+.gradle
+gradle/
+/build/
+**/build/
+gradlew
+gradlew.bat
+.idea/**/gradle.xml
+.idea/**/libraries
+
+### Intellij ###
+.idea
+out/
