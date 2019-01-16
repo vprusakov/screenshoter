@@ -12,6 +12,9 @@
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <group id="screenshoter.menu" text="Screenshoter">
+            <add-to-group group-id="MainMenu" anchor="last"/>
+            <action id="SaveImageAction" class="ru.vprusakov.screenshoter.SaveImageAction" text="Save the selection as image"/>
+        </group>
     </actions>
 </idea-plugin>
