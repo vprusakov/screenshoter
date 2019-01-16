@@ -3,7 +3,6 @@ package ru.vprusakov.screenshoter;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
@@ -18,10 +17,13 @@ import javax.swing.*;
 
 public class SaveImageConfigurable implements SearchableConfigurable, Configurable.NoScroll {
     private SaveImageOptionsPanel myPanel;
+    private final SaveImageOptionsProvider myOptionsProvider;
     private final Project myProject;
 
-    public SaveImageConfigurable(@NotNull Project project) {
+
+    public SaveImageConfigurable(SaveImageOptionsProvider optionsProvider, @NotNull Project project) {
         this.myProject = project;
+        myOptionsProvider = optionsProvider;
     }
 
     @Nls
@@ -51,12 +53,17 @@ public class SaveImageConfigurable implements SearchableConfigurable, Configurab
 
     @Override
     public boolean isModified() {
-        return false;
+        return !myOptionsProvider.getState().equals(myPanel.toState());
     }
 
     @Override
-    public void apply() throws ConfigurationException {
+    public void apply() {
+        myOptionsProvider.loadState(myPanel.toState());
+    }
 
+    @Override
+    public void reset()  {
+        myPanel.fromState(myOptionsProvider.getState());
     }
 
     @Override
@@ -69,6 +76,16 @@ public class SaveImageConfigurable implements SearchableConfigurable, Configurab
         private JPanel myWholePanel;
         private JPanel mySaveDirectoryPanel;
         private TextFieldWithHistoryWithBrowseButton mySaveDirectory;
+
+        SaveImageOptionsProvider.State toState() {
+            SaveImageOptionsProvider.State state = new SaveImageOptionsProvider.State();
+            state.myDirectoryToSave = StringUtil.nullize(mySaveDirectory.getText());
+            return state;
+        }
+
+        void fromState(SaveImageOptionsProvider.State state) {
+            mySaveDirectory.setText(StringUtil.notNullize(state.myDirectoryToSave));
+        }
 
         private void createUIComponents() {
             FileChooserDescriptor singleFolderDescriptor = FileChooserDescriptorFactory.createSingleFolderDescriptor();
