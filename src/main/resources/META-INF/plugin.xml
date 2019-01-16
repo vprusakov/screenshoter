@@ -11,7 +11,9 @@
         <group id="screenshoter.menu" text="Screenshoter">
             <add-to-group group-id="MainMenu" anchor="last"/>
             <action id="SaveImageAction" class="ru.vprusakov.screenshoter.SaveImageAction" text="Save the selection as image"/>
-            <action id="CopyImageAction" class="ru.vprusakov.screenshoter.CopyImageAction" text="Copy the selection as image"/>
+            <action id="CopyImageAction" class="ru.vprusakov.screenshoter.CopyImageAction" text="Copy the selection as image">
+                <keyboard-shortcut first-keystroke="alt C" keymap="$default"/>
+            </action>
         </group>
     </actions>
 
