@@ -1,5 +1,6 @@
 package ru.vprusakov.screenshoter;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,9 @@ public class CopyImageAction extends com.intellij.openapi.actionSystem.AnAction 
         TransferableImage transferableImage = new TransferableImage(image);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(transferableImage, null);
+        CodeImagePlugin.NOTIFICATION_GROUP
+                .createNotification("Image was copied to clipboard", NotificationType.INFORMATION)
+                .notify(project);
     }
 
     static class TransferableImage implements Transferable {

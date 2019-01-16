@@ -1,5 +1,6 @@
 package ru.vprusakov.screenshoter;
 
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
@@ -32,6 +33,13 @@ public class SaveImageAction extends AnAction {
         } catch (IOException e) {
             System.out.println("An error occurred during writing.");
         }
+        CodeImagePlugin.NOTIFICATION_GROUP
+                .createNotification(
+                        "Image was saved",
+                        filePath,
+                        NotificationType.INFORMATION,
+                        null)
+                .notify(project);
     }
 
 }
