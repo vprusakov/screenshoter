@@ -1,5 +1,6 @@
 package ru.vprusakov.screenshoter;
 
+import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -8,6 +9,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -15,26 +17,33 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SaveImageAction extends AnAction {
+
     public void actionPerformed(@NotNull AnActionEvent event) {
         BufferedImage image = new CodeImageBuilder(event).getSelectionScreenshot();
         saveImage(image, event.getProject());
     }
 
     private void saveImage(BufferedImage codeImage, Project project) {
+
         String fileDirPath;
         String fileSeparator;
-        String fileTimeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fileName = "code-image_" + fileTimeStamp;
-        String fileFormat = "png";
+
+        SaveImageOptionsProvider.State options = SaveImageOptionsProvider.getInstance(project).getState();
+        fileDirPath = options.myDirectoryToSave;
 
         try {
-            fileDirPath = getUserSystemProperty("user.home");
+            if (StringUtil.isEmpty(fileDirPath)) {
+                fileDirPath = getUserSystemProperty("user.home");
+            }
             fileSeparator = getUserSystemProperty("file.separator");
         } catch (IllegalArgumentException | SecurityException e) {
             exceptionNotify(e.getMessage(), project);
             return;
         }
 
+        String fileTimeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String fileName = "code-image_" + fileTimeStamp;
+        String fileFormat = "png";
         String filePath = fileDirPath + fileSeparator + fileName + "." + fileFormat;
 
         File file = new File(filePath);
@@ -44,12 +53,25 @@ public class SaveImageAction extends AnAction {
             exceptionNotify("An error occurred during writing.", project);
             return;
         }
+
+        NotificationListener listener = (notification, hyperlinkEvent) -> {
+            try {
+                Desktop.getDesktop().open(file);
+            } catch (IllegalArgumentException  e) {
+                exceptionNotify("File doesn't exist", project);
+            } catch (IOException e) {
+                exceptionNotify("Cannot open image", project);
+            }
+        };
+
+        String openLink = Desktop.isDesktopSupported() ? "<a href=''>Open</a>" : "";
+
         CodeImagePlugin.NOTIFICATION_GROUP
                 .createNotification(
                         "Image was saved",
-                        filePath,
+                        filePath + "<br>" + openLink,
                         NotificationType.INFORMATION,
-                        null)
+                        listener)
                 .notify(project);
     }
 
