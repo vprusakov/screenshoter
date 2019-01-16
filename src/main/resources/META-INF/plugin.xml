@@ -7,10 +7,6 @@
 
     <depends>com.intellij.modules.lang</depends>
 
-    <extensions defaultExtensionNs="com.intellij">
-        <!-- Add your extensions here -->
-    </extensions>
-
     <actions>
         <group id="screenshoter.menu" text="Screenshoter">
             <add-to-group group-id="MainMenu" anchor="last"/>
@@ -18,4 +14,9 @@
             <action id="CopyImageAction" class="ru.vprusakov.screenshoter.CopyImageAction" text="Copy the selection as image"/>
         </group>
     </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="ru.vprusakov.screenshoter.SaveImageOptionsProvider"/>
+        <projectConfigurable groupId="editor" instance="ru.vprusakov.screenshoter.SaveImageConfigurable" id="screenshoter" displayName="Save image options" />
+    </extensions>
 </idea-plugin>
