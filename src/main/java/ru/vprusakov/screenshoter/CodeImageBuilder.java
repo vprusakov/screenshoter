@@ -23,11 +23,10 @@ public class CodeImageBuilder {
         int end = selectionModel.getSelectionEnd();
 
         JComponent contentComponent = editor.getContentComponent();
-        Rectangle rect = new Rectangle(new Point(0, 0));
+        Rectangle rect = new Rectangle(getPoint(editor, start));
 
         for (int i = start; i <= end; i++) {
-            VisualPosition pos = editor.offsetToVisualPosition(i);
-            Point point = editor.visualPositionToXY(pos);
+            Point point = getPoint(editor, i);
             rect.add(point);
             rect.add(new Point(point.x, point.y + editor.getLineHeight()));
         }
@@ -37,6 +36,11 @@ public class CodeImageBuilder {
         contentComponent.paint(graphics);
 
         return img;
+    }
+
+    private Point getPoint(com.intellij.openapi.editor.Editor editor, int offset) {
+        VisualPosition pos = editor.offsetToVisualPosition(offset);
+        return editor.visualPositionToXY(pos);
     }
 
     private final Editor editor;
