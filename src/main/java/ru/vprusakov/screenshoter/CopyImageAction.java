@@ -11,7 +11,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 
-public class CopyImageAction {
+public class CopyImageAction extends com.intellij.openapi.actionSystem.AnAction {
     public void actionPerformed(@NotNull AnActionEvent event) {
         final Project project = event.getProject();
 

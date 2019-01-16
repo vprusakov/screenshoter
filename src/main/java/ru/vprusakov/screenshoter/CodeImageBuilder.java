@@ -2,19 +2,23 @@ package ru.vprusakov.screenshoter;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.SelectionModel;
-import com.intellij.openapi.editor.VisualPosition;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.editor.*;
+import com.intellij.openapi.project.Project;
 import com.intellij.util.ui.UIUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 public class CodeImageBuilder {
 
     CodeImageBuilder(AnActionEvent event){
+        this.project = event.getProject();
         this.editor = event.getData(CommonDataKeys.EDITOR);
+        this.document = Objects.requireNonNull(event.getData(PlatformDataKeys.EDITOR)).getDocument();
     }
 
     BufferedImage getSelectionScreenshot() {
@@ -22,6 +26,14 @@ public class CodeImageBuilder {
         int start = selectionModel.getSelectionStart();
         int end = selectionModel.getSelectionEnd();
         selectionModel.setSelection(0, 0);
+
+        CaretModel caretModel = editor.getCaretModel();
+        int lastLine = document.getLineCount();
+        int lastLineOffset = document.getLineEndOffset(lastLine - 1);
+        WriteCommandAction.runWriteCommandAction(project, () ->
+                document.insertString(lastLineOffset, "\n")
+        );
+        caretModel.moveToOffset(lastLineOffset + 1);
 
         JComponent contentComponent = editor.getContentComponent();
         Rectangle rect = new Rectangle(getPoint(editor, start));
@@ -37,6 +49,11 @@ public class CodeImageBuilder {
         contentComponent.paint(graphics);
 
         selectionModel.setSelection(start, end);
+        WriteCommandAction.runWriteCommandAction(project, () ->
+                document.replaceString(lastLineOffset, lastLineOffset + 1, "")
+        );
+        caretModel.moveToOffset(end);
+
         return img;
     }
 
@@ -45,5 +62,7 @@ public class CodeImageBuilder {
         return editor.visualPositionToXY(pos);
     }
 
+    private final Project project;
     private final Editor editor;
+    private final Document document;
 }
