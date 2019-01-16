@@ -21,6 +21,7 @@ public class CodeImageBuilder {
         SelectionModel selectionModel = editor.getSelectionModel();
         int start = selectionModel.getSelectionStart();
         int end = selectionModel.getSelectionEnd();
+        selectionModel.setSelection(0, 0);
 
         JComponent contentComponent = editor.getContentComponent();
         Rectangle rect = new Rectangle(getPoint(editor, start));
@@ -35,6 +36,7 @@ public class CodeImageBuilder {
         graphics.translate(-rect.x, -rect.y);
         contentComponent.paint(graphics);
 
+        selectionModel.setSelection(start, end);
         return img;
     }
 
