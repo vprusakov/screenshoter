@@ -4,6 +4,9 @@ import com.intellij.notification.NotificationListener;
 import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.actionSystem.Presentation;
+import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +22,7 @@ import java.util.Date;
 public class SaveImageAction extends AnAction {
 
     public void actionPerformed(@NotNull AnActionEvent event) {
+        if (event.getData(CommonDataKeys.EDITOR) == null) return;
         BufferedImage image = new CodeImageBuilder(event).getSelectionScreenshot();
         saveImage(image, event.getProject());
     }
@@ -93,5 +97,12 @@ public class SaveImageAction extends AnAction {
         CodeImagePlugin.NOTIFICATION_GROUP
                 .createNotification("An error occurred:", error, NotificationType.ERROR, null)
                 .notify(project);
+    }
+
+    @Override
+    public void update(@NotNull AnActionEvent event) {
+        Presentation presentation = event.getPresentation();
+        Editor editor = event.getData(CommonDataKeys.EDITOR);
+        presentation.setEnabled(editor != null && editor.getSelectionModel().hasSelection());
     }
 }
