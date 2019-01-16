@@ -4,6 +4,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -20,11 +21,20 @@ public class SaveImageAction extends AnAction {
     }
 
     private void saveImage(BufferedImage codeImage, Project project) {
-        String fileDirPath = System.getProperty("user.home");
-        String fileSeparator = System.getProperty("file.separator");
+        String fileDirPath;
+        String fileSeparator;
         String fileTimeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String fileName = "code-image_" + fileTimeStamp;
         String fileFormat = "png";
+
+        try {
+            fileDirPath = getUserSystemProperty("user.home");
+            fileSeparator = getUserSystemProperty("file.separator");
+        } catch (IllegalArgumentException | SecurityException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
+
         String filePath = fileDirPath + fileSeparator + fileName + "." + fileFormat;
 
         File file = new File(filePath);
@@ -42,4 +52,17 @@ public class SaveImageAction extends AnAction {
                 .notify(project);
     }
 
+    private String getUserSystemProperty(String property) {
+        try {
+            String value = System.getProperty(property);
+            if (value == null) {
+                throw new IllegalArgumentException("System doesn't contain property: " + property);
+            }
+            return value;
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Empty property was passed", e);
+        } catch (SecurityException e) {
+            throw new SecurityException("Security manager doesn't allow access to the system property: " + property, e);
+        }
+    }
 }
